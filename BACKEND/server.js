@@ -1,14 +1,20 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
-const authRoutes = require('./routes/auth');
+//  DEBUG CODE
+console.log('Environment variables loaded:');
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✓ Loaded' : '✗ NOT LOADED');
+console.log('PORT:', process.env.PORT);
+console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✓ Loaded' : '✗ NOT LOADED');
 
-// Placeholder routers to avoid errors if routes aren't ready yet
-const transactionRoutes = express.Router();
-const budgetRoutes = express.Router();
-const goalRoutes = express.Router();
-const billRoutes = express.Router();
+
+const auth = require('./routes/auth');
+const transaction = require('./routes/transaction');
+const budget = require('./routes/budget');
+const goal = require('./routes/goal');
+const bill = require('./routes/bill');
 
 const app = express();
 
@@ -16,22 +22,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- DATABASE CONNECTION ---
-mongoose.connect('mongodb://127.0.0.1:27017/financeDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+// Database connection
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// --- ROUTES ---
-app.use('/api/auth', authRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/budgets', budgetRoutes);
-app.use('/api/goals', goalRoutes);
-app.use('/api/bills', billRoutes);
+// Routes
+app.use((req, res, next) => {
+  console.log('Request Path:', req.path);
+  next();
+});
 
-// Health check
+app.use('/api/auth', auth);
+app.use('/api/transaction', transaction);
+app.use('/api/budget', budget);
+app.use('/api/goal', goal);
+app.use('/api/bill', bill);
+
+// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     message: 'Finance Tracker API is running!', 
@@ -39,19 +47,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// --- ERROR HANDLER ---
+// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!', error: err.message });
+  console.error('Error:', err.stack);
+  res.status(500).json({ 
+    message: 'Something went wrong!', 
+    error: process.env.NODE_ENV === 'development' ? err.message : {} 
+  });
 });
 
-// --- 404 HANDLER ---
+// ✅ FIXED: 404 handler - removed the '*' path
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
+const PORT = process.env.PORT || 5000;
 
-const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 API Health: http://localhost:${PORT}/api/health`);

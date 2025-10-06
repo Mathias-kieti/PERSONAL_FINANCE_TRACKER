@@ -8,8 +8,8 @@ const {
   changePassword,
   logout,
   deleteAccount
-} = require('../controllers/authController'); // controllers folder
-const { authenticateToken } = require('../middleware/auth'); // middleware folder
+} = require('../Controllers/authController'); // controllers folder
+const { authenticateToken } = require('../Middleware/auth'); // middleware folder
 
 const router = express.Router();
 

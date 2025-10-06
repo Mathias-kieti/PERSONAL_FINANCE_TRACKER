@@ -1,340 +1,310 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { transactionAPI, budgetAPI, billAPI } from '../../services/api';
-import { 
-  DollarSign, TrendingUp, TrendingDown, Wallet, 
-  AlertCircle, Calendar, ArrowUpRight, ArrowDownRight 
-} from 'lucide-react';
-import { 
-  PieChart, Pie, Cell, ResponsiveContainer, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend 
-} from 'recharts';
+import { X, Save, AlertCircle } from 'lucide-react';
 
-const Dashboard = () => {
-  const { user } = useAuth();
-  const [stats, setStats] = useState(null);
-  const [budgets, setBudgets] = useState([]);
-  const [upcomingBills, setUpcomingBills] = useState([]);
-  const [loading, setLoading] = useState(true);
+const BillForm = ({ bill, onSubmit, onCancel }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    amount: '',
+    category: 'utilities',
+    dueDate: '',
+    frequency: 'monthly',
+    description: '',
+    reminderDays: 3,
+    autoPayEnabled: false
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+  const categories = [
+    { value: 'utilities', label: 'Utilities' },
+    { value: 'housing', label: 'Housing' },
+    { value: 'transportation', label: 'Transportation' },
+    { value: 'insurance', label: 'Insurance' },
+    { value: 'subscription', label: 'Subscription' },
+    { value: 'loan', label: 'Loan' },
+    { value: 'credit_card', label: 'Credit Card' },
+    { value: 'healthcare', label: 'Healthcare' },
+    { value: 'education', label: 'Education' },
+    { value: 'internet', label: 'Internet' },
+    { value: 'phone', label: 'Phone' },
+    { value: 'other', label: 'Other' }
+  ];
+
+  const frequencies = [
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'bi-weekly', label: 'Bi-Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'quarterly', label: 'Quarterly' },
+    { value: 'semi-annually', label: 'Semi-Annually' },
+    { value: 'yearly', label: 'Yearly' }
+  ];
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (bill) {
+      setFormData({
+        name: bill.name || '',
+        amount: bill.amount || '',
+        category: bill.category || 'utilities',
+        dueDate: bill.dueDate ? new Date(bill.dueDate).toISOString().split('T')[0] : '',
+        frequency: bill.frequency || 'monthly',
+        description: bill.description || '',
+        reminderDays: bill.reminderDays || 3,
+        autoPayEnabled: bill.autoPayEnabled || false
+      });
+    }
+  }, [bill]);
 
-  const fetchDashboardData = async () => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+    setError('');
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError('Bill name is required');
+      return false;
+    }
+    if (!formData.amount || formData.amount <= 0) {
+      setError('Valid amount is required');
+      return false;
+    }
+    if (!formData.dueDate) {
+      setError('Due date is required');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setError('');
+
     try {
-      setLoading(true);
-      const [statsRes, budgetsRes, billsRes] = await Promise.all([
-        transactionAPI.getStats(),
-        budgetAPI.getWithSpending(),
-        billAPI.getUpcoming(7)
-      ]);
-
-      setStats(statsRes.data);
-      setBudgets(budgetsRes.data.budgets || []);
-      setUpcomingBills(billsRes.data.bills || []);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      await onSubmit(formData);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to save bill');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const summary = stats?.summary || { totalIncome: 0, totalExpenses: 0, balance: 0 };
-  const expensesByCategory = stats?.expensesByCategory || [];
-  const recentTransactions = stats?.recentTransactions || [];
-  const monthlyTrends = stats?.monthlyTrends || [];
-
-  // Format category data for pie chart
-  const categoryChartData = expensesByCategory.map(item => ({
-    name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
-    value: item.total
-  }));
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.name}! 👋
-          </h1>
-          <p className="text-gray-600 mt-2">Here's your financial overview</p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {bill ? 'Edit Bill' : 'Add New Bill'}
+          </h2>
+          <button
+            onClick={onCancel}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X size={24} />
+          </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Total Income Card */}
-          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-green-100 text-sm font-medium">Total Income</p>
-                <h3 className="text-3xl font-bold mt-2">
-                  ${summary.totalIncome.toFixed(2)}
-                </h3>
-              </div>
-              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <TrendingUp size={24} />
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-green-100 text-sm">
-              <ArrowUpRight size={16} />
-              <span>From all sources</span>
-            </div>
+        {/* Error Message */}
+        {error && (
+          <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+            <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Bill Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Bill Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g., Electric Bill, Rent, Netflix"
+              required
+            />
           </div>
 
-          {/* Total Expenses Card */}
-          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-red-100 text-sm font-medium">Total Expenses</p>
-                <h3 className="text-3xl font-bold mt-2">
-                  ${summary.totalExpenses.toFixed(2)}
-                </h3>
-              </div>
-              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <TrendingDown size={24} />
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-red-100 text-sm">
-              <ArrowDownRight size={16} />
-              <span>Total spending</span>
-            </div>
-          </div>
-
-          {/* Balance Card */}
-          <div className={`bg-gradient-to-br ${
-            summary.balance >= 0 
-              ? 'from-blue-500 to-blue-600' 
-              : 'from-orange-500 to-orange-600'
-          } rounded-xl shadow-lg p-6 text-white`}>
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-blue-100 text-sm font-medium">Net Balance</p>
-                <h3 className="text-3xl font-bold mt-2">
-                  ${Math.abs(summary.balance).toFixed(2)}
-                </h3>
-              </div>
-              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <Wallet size={24} />
+          {/* Amount and Category */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Amount <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  $
+                </span>
+                <input
+                  type="number"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0.01"
+                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.00"
+                  required
+                />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-blue-100 text-sm">
-              <DollarSign size={16} />
-              <span>{summary.balance >= 0 ? 'Positive' : 'Negative'} balance</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Spending by Category */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Spending by Category
-            </h3>
-            {categoryChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoryChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoryChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                No expense data available
-              </div>
-            )}
-          </div>
-
-          {/* Monthly Trends */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Monthly Trends
-            </h3>
-            {monthlyTrends.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyTrends}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey={(item) => `${item._id.month}/${item._id.year}`} 
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                  <Legend />
-                  <Bar dataKey="income" fill="#10B981" name="Income" />
-                  <Bar dataKey="expenses" fill="#EF4444" name="Expenses" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                No trend data available
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Budget Progress & Upcoming Bills */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Budget Progress */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Budget Overview
-            </h3>
-            {budgets.length > 0 ? (
-              <div className="space-y-4">
-                {budgets.slice(0, 3).map((budget) => (
-                  <div key={budget._id} className="border-b border-gray-200 pb-4 last:border-0">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium text-gray-900 capitalize">
-                        {budget.category}
-                      </span>
-                      <span className="text-sm text-gray-600">
-                        ${budget.spent?.toFixed(2)} / ${budget.amount.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${
-                          budget.percentage >= 100 
-                            ? 'bg-red-500' 
-                            : budget.percentage >= 80 
-                            ? 'bg-yellow-500' 
-                            : 'bg-green-500'
-                        }`}
-                        style={{ width: `${Math.min(budget.percentage, 100)}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {budget.percentage.toFixed(1)}% used
-                    </p>
-                  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                {categories.map(cat => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
                 ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-8">
-                No budgets set yet. Create your first budget!
-              </p>
-            )}
-          </div>
-
-          {/* Upcoming Bills */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Calendar size={20} />
-              Upcoming Bills (Next 7 Days)
-            </h3>
-            {upcomingBills.length > 0 ? (
-              <div className="space-y-3">
-                {upcomingBills.map((bill) => (
-                  <div 
-                    key={bill._id} 
-                    className="flex justify-between items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-900">{bill.name}</p>
-                      <p className="text-sm text-gray-600 capitalize">{bill.category}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Due: {new Date(bill.dueDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-red-600">
-                        ${bill.amount.toFixed(2)}
-                      </p>
-                      <span className="text-xs px-2 py-1 bg-yellow-200 text-yellow-800 rounded">
-                        {bill.frequency}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-8">
-                No upcoming bills in the next 7 days
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Transactions */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Recent Transactions
-          </h3>
-          {recentTransactions.length > 0 ? (
-            <div className="space-y-2">
-              {recentTransactions.map((transaction) => (
-                <div 
-                  key={transaction._id} 
-                  className="flex justify-between items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      transaction.type === 'income' 
-                        ? 'bg-green-100 text-green-600' 
-                        : 'bg-red-100 text-red-600'
-                    }`}>
-                      {transaction.type === 'income' ? (
-                        <TrendingUp size={20} />
-                      ) : (
-                        <TrendingDown size={20} />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 capitalize">
-                        {transaction.category}
-                      </p>
-                      <p className="text-sm text-gray-600">{transaction.description}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(transaction.date).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <span className={`font-semibold ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
-                  </span>
-                </div>
-              ))}
+              </select>
             </div>
-          ) : (
-            <p className="text-gray-500 text-center py-8">
-              No recent transactions
+          </div>
+
+          {/* Due Date and Frequency */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Due Date <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                name="dueDate"
+                value={formData.dueDate}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Frequency <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="frequency"
+                value={formData.frequency}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                {frequencies.map(freq => (
+                  <option key={freq.value} value={freq.value}>
+                    {freq.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Reminder Days */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Reminder (days before due date)
+            </label>
+            <input
+              type="number"
+              name="reminderDays"
+              value={formData.reminderDays}
+              onChange={handleChange}
+              min="0"
+              max="30"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Get notified {formData.reminderDays} day(s) before the due date
             </p>
-          )}
-        </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description (Optional)
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows="3"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              placeholder="Add any additional notes..."
+              maxLength="300"
+            />
+            <p className="mt-1 text-sm text-gray-500 text-right">
+              {formData.description.length}/300
+            </p>
+          </div>
+
+          {/* Auto Pay Toggle */}
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+            <input
+              type="checkbox"
+              id="autoPayEnabled"
+              name="autoPayEnabled"
+              checked={formData.autoPayEnabled}
+              onChange={handleChange}
+              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="autoPayEnabled" className="text-sm font-medium text-gray-700">
+              Auto-pay enabled
+            </label>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save size={20} />
+                  {bill ? 'Update Bill' : 'Add Bill'}
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default BillForm;

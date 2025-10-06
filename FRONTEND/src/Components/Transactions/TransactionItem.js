@@ -4,17 +4,24 @@ import { ArrowUpCircle, ArrowDownCircle, Trash2 } from 'lucide-react';
 const TransactionItem = ({ transaction, onDelete }) => {
   const isIncome = transaction.type === 'income';
 
+  const handleDelete = () => {
+    console.log('Deleting transaction:', transaction._id);
+    onDelete(transaction._id);
+  };
+
   return (
     <div className="flex justify-between items-center bg-white shadow rounded-lg p-3">
       <div className="flex items-center gap-3">
         {isIncome ? (
           <ArrowUpCircle className="text-green-600" size={24} />
-        ) : (
+        ): (
           <ArrowDownCircle className="text-red-600" size={24} />
         )}
         <div>
           <p className="font-medium text-gray-800">{transaction.category}</p>
-          <p className="text-sm text-gray-500">{transaction.date}</p>
+          <p className="text-sm text-gray-500">
+            {new Date(transaction.date).toLocaleDateString()}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-3">
@@ -23,10 +30,10 @@ const TransactionItem = ({ transaction, onDelete }) => {
             isIncome ? 'text-green-600' : 'text-red-600'
           }`}
         >
-          {isIncome ? '+' : '-'}${transaction.amount}
+          {isIncome ? '+' : '-'}KSH {transaction.amount}
         </p>
         <button
-          onClick={() => onDelete(transaction._id)}
+          onClick={handleDelete}
           className="text-gray-400 hover:text-red-600 transition-colors"
         >
           <Trash2 size={18} />

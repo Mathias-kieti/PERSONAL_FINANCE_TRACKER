@@ -1,7 +1,11 @@
 import React from 'react';
+import { Trash2 } from 'lucide-react';
 
-const BudgetProgress = ({ budget }) => {
-  const percentage = (budget.spent / budget.amount) * 100;
+const BudgetProgress = ({ budget, onDelete }) => {
+  // ✅ SAFE: Handle undefined spent value
+  const spent = budget.spent || 0;
+  const percentage = (spent / budget.amount) * 100;
+  
   const statusColor =
     percentage >= 100
       ? 'bg-red-500'
@@ -15,9 +19,17 @@ const BudgetProgress = ({ budget }) => {
         <span className="font-medium text-gray-800 capitalize">
           {budget.category}
         </span>
-        <span className="text-sm text-gray-600">
-          ${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-600">
+            KSH {spent.toFixed(2)} / KSH {budget.amount.toFixed(2)}
+          </span>
+          <button
+            onClick={onDelete}
+            className="text-gray-400 hover:text-red-600 transition-colors"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div

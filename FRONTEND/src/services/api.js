@@ -62,41 +62,41 @@ export const authAPI = {
 };
 
 export const transactionAPI = {
-  getAll: (params) => api.get('/transactions', { params }),
-  getOne: (id) => api.get(`/transactions/${id}`),
-  create: (data) => api.post('/transactions', data),
-  update: (id, data) => api.put(`/transactions/${id}`, data),
-  delete: (id) => api.delete(`/transactions/${id}`),
-  getStats: (params) => api.get('/transactions/stats', { params }),
-  bulkCreate: (transactions) => api.post('/transactions/bulk', { transactions }),
+  getAll: (params) => api.get('/transaction', { params }),
+  getOne: (id) => api.get(`/transaction/${id}`),
+  create: (data) => api.post('/transaction', data),
+  update: (id, data) => api.put(`/transaction/${id}`, data),
+  delete: (id) => api.delete(`/transaction/${id}`),
+  getStats: (params) => api.get('/transaction/stat', { params }),
+  bulkCreate: (transaction) => api.post('/transaction/bulk', { transaction }),
 };
 
 export const budgetAPI = {
-  getAll: () => api.get('/budgets'),
-  getOne: (id) => api.get(`/budgets/${id}`),
-  create: (data) => api.post('/budgets', data),
-  update: (id, data) => api.put(`/budgets/${id}`, data),
-  delete: (id) => api.delete(`/budgets/${id}`),
-  getWithSpending: () => api.get('/budgets/with-spending'),
+  getAll: () => api.get('/budget'),
+  getOne: (id) => api.get(`/budget/${id}`),
+  create: (data) => api.post('/budget', data),
+  update: (id, data) => api.put(`/budget/${id}`, data),
+  delete: (id) => api.delete(`/budget/${id}`),
+  getWithSpending: () => api.get('/budget/with-spending'),
 };
 
 export const goalAPI = {
-  getAll: () => api.get('/goals'),
-  getOne: (id) => api.get(`/goals/${id}`),
-  create: (data) => api.post('/goals', data),
-  update: (id, data) => api.put(`/goals/${id}`, data),
-  delete: (id) => api.delete(`/goals/${id}`),
-  updateProgress: (id, amount) => api.patch(`/goals/${id}/progress`, { amount }),
+  getAll: () => api.get('/goal'),
+  getOne: (id) => api.get(`/goal/${id}`),
+  create: (data) => api.post('/goal', data),
+  update: (id, data) => api.put(`/goal/${id}`, data),
+  delete: (id) => api.delete(`/goal/${id}`),
+  updateProgress: (id, amount) => api.patch(`/goal/${id}/progress`, { amount }),
 };
 
 export const billAPI = {
-  getAll: () => api.get('/bills'),
-  getOne: (id) => api.get(`/bills/${id}`),
-  create: (data) => api.post('/bills', data),
-  update: (id, data) => api.put(`/bills/${id}`, data),
-  delete: (id) => api.delete(`/bills/${id}`),
-  getUpcoming: (days = 7) => api.get('/bills/upcoming', { params: { days } }),
-  markAsPaid: (id) => api.patch(`/bills/${id}/paid`),
+  getAll: () => api.get('/bill'),
+  getOne: (id) => api.get(`/bill/${id}`),
+  create: (data) => api.post('/bill', data),
+  update: (id, data) => api.put(`/bill/${id}`, data),
+  delete: (id) => api.delete(`/bill/${id}`),
+  getUpcoming: (days = 7) => api.get('/bill/upcoming', { params: { days } }),
+  markAsPaid: (id) => api.patch(`/bill/${id}/paid`),
 };
 
 export default api;

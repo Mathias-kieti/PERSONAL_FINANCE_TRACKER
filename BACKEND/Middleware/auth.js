@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../Models/User');
 
 // Verify JWT token
 const authenticateToken = async (req, res, next) => {
@@ -30,7 +30,7 @@ const authenticateToken = async (req, res, next) => {
 
 // Generate JWT token
 const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET || 'secret123', { expiresIn: '7d' });
+  return jwt.sign({ userId }, process.env.JWT_SECRET || 'secret123', { expiresIn: '30d' });
 };
 
 module.exports = {

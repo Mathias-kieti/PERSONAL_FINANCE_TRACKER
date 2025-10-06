@@ -1,15 +1,14 @@
-
 import React from 'react';
 
-const GoalCard = ({ goal, onUpdate, onDelete }) => {
-  const progress = Math.min((goal.saved / goal.target) * 100, 100);
+const GoalsCard = ({ goal, onUpdate, onDelete }) => {
+  const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
 
   return (
     <div className="bg-white shadow rounded-lg p-4">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-semibold">{goal.title}</h2>
+        <h2 className="text-lg font-semibold">{goal.name}</h2> {/* Changed from title */}
         <button
-          onClick={() => onDelete(goal.id)}
+          onClick={() => onDelete(goal._id)}
           className="text-red-500 hover:text-red-700 text-sm"
         >
           Delete
@@ -17,10 +16,10 @@ const GoalCard = ({ goal, onUpdate, onDelete }) => {
       </div>
 
       <p className="text-sm text-gray-600">
-        Target: <span className="font-medium">KSH {goal.target}</span>
+        Target: <span className="font-medium">KSH {goal.targetAmount}</span> {/* Changed from target */}
       </p>
       <p className="text-sm text-gray-600">
-        Saved: <span className="font-medium">KSH {goal.saved}</span>
+        Saved: <span className="font-medium">KSH {goal.currentAmount}</span> {/* Changed from saved */}
       </p>
 
       {/* Progress Bar */}
@@ -38,4 +37,4 @@ const GoalCard = ({ goal, onUpdate, onDelete }) => {
   );
 };
 
-export default GoalCard;
+export default GoalsCard;

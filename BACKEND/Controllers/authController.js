@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const { generateToken } = require('../middleware/auth');
+const User = require('../Models/User');
+const { generateToken } = require('../Middleware/auth');
 const { validationResult } = require('express-validator');
 
 // @desc    Register new user
