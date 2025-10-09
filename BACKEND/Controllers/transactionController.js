@@ -17,13 +17,14 @@ const createTransaction = async (req, res) => {
     const transactionData = {
       ...req.body,
       user: req.user._id
+      
     };
 
     const transaction = await Transaction.create(transactionData);
     
-    // Populate user field for response
+    // Populate both user AND goal
     await transaction.populate('user', 'name email');
-
+    await transaction.populate('goalId', 'name targetAmount currentAmount'); 
     res.status(201).json({
       message: 'Transaction created successfully',
       data: { transaction }
@@ -53,6 +54,7 @@ const getTransactions = async (req, res) => {
     // Add filters based on query parameters
     if (req.query.type) filter.type = req.query.type;
     if (req.query.category) filter.category = req.query.category;
+    if (req.query.goalId) filter.goalId = req.query.goalId; 
     if (req.query.startDate || req.query.endDate) {
       filter.date = {};
       if (req.query.startDate) filter.date.$gte = new Date(req.query.startDate);
@@ -67,12 +69,13 @@ const getTransactions = async (req, res) => {
       ];
     }
 
-    // Execute query with pagination
+    // Include goal population
     const transactions = await Transaction.find(filter)
       .sort({ date: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('user', 'name email');
+      .populate('user', 'name email')
+      .populate('goalId', 'name targetAmount currentAmount'); 
 
     // Get total count for pagination
     const total = await Transaction.countDocuments(filter);
@@ -107,7 +110,9 @@ const getTransaction = async (req, res) => {
     const transaction = await Transaction.findOne({
       _id: req.params.id,
       user: req.user._id
-    }).populate('user', 'name email');
+    })
+    .populate('user', 'name email')
+    .populate('goalId', 'name targetAmount currentAmount'); 
 
     if (!transaction) {
       return res.status(404).json({
@@ -147,7 +152,9 @@ const updateTransaction = async (req, res) => {
       { _id: req.params.id, user: req.user._id },
       req.body,
       { new: true, runValidators: true }
-    ).populate('user', 'name email');
+    )
+    .populate('user', 'name email')
+    .populate('goalId', 'name targetAmount currentAmount'); 
 
     if (!transaction) {
       return res.status(404).json({
@@ -265,7 +272,8 @@ const getTransactionStats = async (req, res) => {
     const recentTransactions = await Transaction.find({ user: userId })
       .sort({ date: -1 })
       .limit(5)
-      .select('type amount category description date');
+      .select('type amount category description date goalId')
+      .populate('goalId', 'name targetAmount'); 
 
     res.json({
       message: 'Transaction statistics retrieved successfully',
@@ -294,6 +302,64 @@ const getTransactionStats = async (req, res) => {
   }
 };
 
+// @desc    Get transactions by goal
+// @route   GET /api/transactions/goal/:goalId
+// @access  Private
+const getTransactionsByGoal = async (req, res) => {
+  try {
+    const { goalId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter = { 
+      user: req.user._id,
+      goalId: goalId 
+    };
+
+    const transactions = await Transaction.find(filter)
+      .sort({ date: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('user', 'name email')
+      .populate('goalId', 'name targetAmount currentAmount');
+
+    const total = await Transaction.countDocuments(filter);
+
+    // Calculate total amount for this goal
+    const totalAmountResult = await Transaction.aggregate([
+      { $match: filter },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+
+    const totalAmount = totalAmountResult.length > 0 ? totalAmountResult[0].total : 0;
+
+    res.json({
+      message: 'Goal transactions retrieved successfully',
+      data: {
+        transactions,
+        summary: {
+          totalAmount,
+          transactionCount: total
+        },
+        pagination: {
+          current: page,
+          pages: Math.ceil(total / limit),
+          total,
+          limit
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get goal transactions error:', error);
+    res.status(500).json({
+      message: 'Failed to retrieve goal transactions',
+      error: 'GET_GOAL_TRANSACTIONS_ERROR'
+    });
+  }
+};
+
 // @desc    Bulk create transactions (CSV import)
 // @route   POST /api/transactions/bulk
 // @access  Private
@@ -316,7 +382,7 @@ const bulkCreateTransactions = async (req, res) => {
 
     // Create all transactions
     const createdTransactions = await Transaction.insertMany(transactionsWithUser, {
-      ordered: false, // Continue even if some fail
+      ordered: false, 
       runValidators: true
     });
 
@@ -363,5 +429,6 @@ module.exports = {
   updateTransaction,
   deleteTransaction,
   getTransactionStats,
+  getTransactionsByGoal, 
   bulkCreateTransactions
 };

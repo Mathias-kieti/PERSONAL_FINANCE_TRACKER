@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { billAPI } from '../../services/api';
 import BillForm from './BillsForm';
 import BillCard from './BillsCard';
-import { Bell, Plus, AlertCircle, Calendar, DollarSign, TrendingUp } from 'lucide-react';
+import { Bell, Plus, AlertCircle, Calendar, TrendingUp } from 'lucide-react';
 
 const BillsManager = () => {
   const [bills, setBills] = useState([]);
@@ -84,10 +84,20 @@ const BillsManager = () => {
 
   const handleMarkAsPaid = async (billId) => {
     try {
-      await billAPI.markAsPaid(billId);
+      const bill = bills.find(b => b._id === billId);
+      if (!bill) {
+        console.error('Bill not found');
+        setError('Bill not found. Please try again.');
+        return;
+      }
+
+      console.log('🔍 Marking bill as paid:', bill.name, 'Amount:', bill.amount);
+      await billAPI.markAsPaid(billId, bill.amount);
       await fetchBillsData();
+      
+      console.log('✅ Bill marked as paid successfully');
     } catch (err) {
-      console.error('Error marking bill as paid:', err);
+      console.error('❌ Error marking bill as paid:', err);
       setError('Failed to mark bill as paid. Please try again.');
     }
   };
@@ -183,11 +193,11 @@ const BillsManager = () => {
 
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-gray-600">Monthly Amount</h3>
-                <DollarSign className="text-green-500" size={24} />
+                <h3 className="text-sm font-medium text-gray-600">Total Amount</h3>
+                <span className="text-green-500" size={24}>Ksh</span> 
               </div>
               <p className="text-3xl font-bold text-gray-900">
-                ${stats.totalAmount.toFixed(2)}
+                ksh. {stats.totalAmount.toFixed(2)}
               </p>
             </div>
 
@@ -197,7 +207,7 @@ const BillsManager = () => {
                 <TrendingUp className="text-yellow-500" size={24} />
               </div>
               <p className="text-3xl font-bold text-gray-900">
-                ${stats.upcomingAmount.toFixed(2)}
+                Ksh. {stats.upcomingAmount.toFixed(2)}
               </p>
             </div>
 

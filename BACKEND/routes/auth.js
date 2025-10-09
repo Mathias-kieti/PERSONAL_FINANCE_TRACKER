@@ -8,8 +8,8 @@ const {
   changePassword,
   logout,
   deleteAccount
-} = require('../Controllers/authController'); // controllers folder
-const { authenticateToken } = require('../Middleware/auth'); // middleware folder
+} = require('../Controllers/authController'); 
+const { authenticateToken } = require('../Middleware/auth'); 
 
 const router = express.Router();
 
@@ -67,11 +67,11 @@ const changePasswordValidation = [
     .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number')
 ];
 
-// --- Public routes ---
+//  Public routes 
 router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
 
-// --- Protected routes (requires authentication) ---
+
 router.use(authenticateToken);
 
 router.get('/me', getMe);

@@ -26,7 +26,7 @@ const TransactionList = () => {
         const result = await response.json();
         console.log('🔍 DEBUG - Full backend response:', result);
         
-        // ✅ Extract transactions from the nested response
+        //  Extract transactions from the nested response
         const transactionsArray = result.data.transactions || [];
         console.log('🔍 DEBUG - Transactions array:', transactionsArray);
         
@@ -52,16 +52,17 @@ const TransactionList = () => {
         return;
       }
 
-      // Format the data for backend
+      //  Include goalId in the backend data
       const backendData = {
         type: transactionData.type,
         category: transactionData.category,
         amount: Number(transactionData.amount),
         date: transactionData.date,
-        description: transactionData.category
+        description: transactionData.category,
+        goalId: transactionData.goalId 
       };
 
-      console.log('🔍 DEBUG - Sending transaction:', backendData);
+      console.log('🎯 [DEBUG] Sending transaction to backend with goalId:', transactionData.goalId, 'Full data:', backendData);
 
       const response = await fetch('http://localhost:5000/api/transaction', {
         method: 'POST',
@@ -81,6 +82,7 @@ const TransactionList = () => {
         // ✅ Extract transaction from the nested response
         const newTransaction = result.data.transaction;
         console.log('✅ Transaction saved successfully:', newTransaction);
+        console.log('🎯 Transaction goalId:', newTransaction.goalId); // ✅ Check if goalId is saved
         
         setTransactions(prev => [...prev, newTransaction]);
         alert('Transaction saved successfully!');

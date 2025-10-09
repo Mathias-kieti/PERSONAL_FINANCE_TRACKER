@@ -168,7 +168,7 @@ billSchema.methods.markAsPaid = function(paymentDetails = {}) {
   
   // Update due date to next occurrence
   this.dueDate = this.calculateNextDueDate();
-  this.isPaid = false; // Reset for next billing cycle
+  this.isPaid = true; 
   
   return this.save();
 };

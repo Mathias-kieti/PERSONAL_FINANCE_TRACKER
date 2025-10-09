@@ -3,13 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
-//  DEBUG CODE
-console.log('Environment variables loaded:');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✓ Loaded' : '✗ NOT LOADED');
-console.log('PORT:', process.env.PORT);
-console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✓ Loaded' : '✗ NOT LOADED');
-
-
 const auth = require('./routes/auth');
 const transaction = require('./routes/transaction');
 const budget = require('./routes/budget');
@@ -56,7 +49,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ FIXED: 404 handler - removed the '*' path
+//  404 handler 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });

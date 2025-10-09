@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const TransactionForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -6,9 +6,14 @@ const TransactionForm = ({ onSubmit }) => {
     category: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
+    goalId: '' 
   });
 
-  // Allowed categories from your schema
+  const [goals, setGoals] = useState([]); 
+  const [loadingGoals, setLoadingGoals] = useState(true);
+  const [error, setError] = useState('');
+
+  // Categories arrays
   const expenseCategories = [
     'food', 'transportation', 'utilities', 'entertainment', 
     'healthcare', 'shopping', 'education', 'travel', 'housing',
@@ -21,6 +26,84 @@ const TransactionForm = ({ onSubmit }) => {
   ];
 
   const categories = formData.type === 'income' ? incomeCategories : expenseCategories;
+
+  // Get token from localStorage
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  // Fetch goals for the dropdown
+  useEffect(() => {
+    const fetchGoals = async () => {
+      try {
+        setLoadingGoals(true);
+        setError('');
+        const token = getToken();
+        
+        if (!token) {
+          setError('No authentication token found');
+          setLoadingGoals(false);
+          return;
+        }
+
+        console.log('🔍 Fetching goals for transaction form...');
+        
+        const response = await fetch('http://localhost:5000/api/goal', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('📡 Goals API Response status:', response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Goals API Response data:', data);
+          
+          // Handle different response formats safely
+          let goalsArray = [];
+          
+          if (Array.isArray(data)) {
+            goalsArray = data;
+          } else if (data && typeof data === 'object') {
+            if (Array.isArray(data.data)) {
+              goalsArray = data.data;
+            } else if (Array.isArray(data.goals)) {
+              goalsArray = data.goals;
+            } else {
+              goalsArray = Object.values(data).filter(item => 
+                item && typeof item === 'object' && item.name !== undefined
+              );
+            }
+          }
+          
+          console.log(`✅ Processed ${goalsArray.length} goals:`, goalsArray);
+        
+          if (!Array.isArray(goalsArray)) {
+            goalsArray = [];
+          }
+          
+          setGoals(goalsArray);
+          
+          if (goalsArray.length === 0) {
+            setError('No goals found. Please create goals first.');
+          }
+        } else {
+          const errorText = await response.text();
+          console.error('❌ Goals API Error:', errorText);
+          setError(`Failed to load goals: ${response.status}`);
+        }
+      } catch (err) {
+        console.error('❌ Network error fetching goals:', err);
+        setError('Network error loading goals. Check if backend is running.');
+      } finally {
+        setLoadingGoals(false);
+      }
+    };
+
+    fetchGoals();
+  }, []);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -37,23 +120,34 @@ const TransactionForm = ({ onSubmit }) => {
       return;
     }
 
+    // ✅ FIXED: Create base object without goalId
     const submissionData = {
-      ...formData,
+      type: formData.type,
+      category: formData.category,
       amount: Number(formData.amount),
+      date: formData.date,
       description: formData.category
     };
 
-    console.log('Submitting transaction:', submissionData);
+    // ✅ ONLY add goalId if it has a value (not empty string)
+    if (formData.goalId && formData.goalId.trim() !== '') {
+      submissionData.goalId = formData.goalId;
+    }
+
+    console.log('🎯 [DEBUG] Submitting transaction with goalId:', formData.goalId || 'None', 'Full data:', submissionData);
     onSubmit(submissionData);
     
-    // Reset form but keep type and date
+    // Reset form
     setFormData({
       type: 'expense',
       category: '',
       amount: '',
       date: new Date().toISOString().split('T')[0],
+      goalId: '' 
     });
   };
+
+  const safeGoals = Array.isArray(goals) ? goals : [];
 
   return (
     <form
@@ -109,12 +203,44 @@ const TransactionForm = ({ onSubmit }) => {
           required
         />
       </div>
+
+      {/* Goal Selection Dropdown */}
+      <div>
+        <select
+          name="goalId"
+          value={formData.goalId}
+          onChange={handleChange}
+          className="w-full border rounded-lg px-3 py-2 text-sm"
+          disabled={loadingGoals}
+        >
+          <option value="">-- Allocate to Goal (Optional) --</option>
+          {loadingGoals ? (
+            <option value="" disabled>Loading goals...</option>
+          ) : error ? (
+            <option value="" disabled>Error: {error}</option>
+          ) : safeGoals.length === 0 ? (
+            <option value="" disabled>No goals found. Create goals first.</option>
+          ) : (
+            safeGoals.map(goal => (
+              <option key={goal._id} value={goal._id}>
+                {goal.name} - Target: KSH {goal.targetAmount?.toLocaleString()}
+              </option>
+            ))
+          )}
+        </select>
+        
+        {/* Debug info */}
+        <div className="text-xs text-gray-400 mt-1">
+          Status: {loadingGoals ? 'Loading...' : error ? `Error: ${error}` : `Found ${safeGoals.length} goals`}
+        </div>
+      </div>
       
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+        disabled={loadingGoals}
       >
-        Add Transaction
+        {loadingGoals ? 'Loading...' : 'Add Transaction'}
       </button>
     </form>
   );

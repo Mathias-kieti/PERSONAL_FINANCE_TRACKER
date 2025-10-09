@@ -96,7 +96,12 @@ export const billAPI = {
   update: (id, data) => api.put(`/bill/${id}`, data),
   delete: (id) => api.delete(`/bill/${id}`),
   getUpcoming: (days = 7) => api.get('/bill/upcoming', { params: { days } }),
-  markAsPaid: (id) => api.patch(`/bill/${id}/paid`),
+  markAsPaid: (id, amount) => api.patch(`/bill/${id}/paid`, {
+    amount: amount,
+    paidDate: new Date().toISOString(),
+    method: 'other', 
+    notes: 'Marked as paid via app'
+  }),
 };
 
 export default api;

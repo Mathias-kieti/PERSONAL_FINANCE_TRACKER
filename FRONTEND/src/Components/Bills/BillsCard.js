@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Edit, Trash2, CheckCircle, Calendar, AlertCircle, 
-  Clock, DollarSign, RefreshCw 
+  Clock, RefreshCw 
 } from 'lucide-react';
 
 const BillCard = ({ bill, onEdit, onDelete, onMarkAsPaid }) => {
@@ -93,7 +93,7 @@ const BillCard = ({ bill, onEdit, onDelete, onMarkAsPaid }) => {
         {/* Amount */}
         <div className="mb-4">
           <div className="flex items-center gap-2 text-3xl font-bold text-gray-900">
-            <DollarSign size={28} className="text-gray-600" />
+            <span className="text-gray-600 text-2x1">Ksh</span> 
             {typeof bill.amount === 'number' ? bill.amount.toFixed(2) : bill.amount}
           </div>
           <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">

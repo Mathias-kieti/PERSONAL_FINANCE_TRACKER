@@ -7,7 +7,8 @@ const {
   updateTransaction,
   deleteTransaction,
   getTransactionStats,
-  bulkCreateTransactions
+  bulkCreateTransactions,
+  getTransactionsByGoal 
 } = require('../Controllers/transactionController');
 const { authenticateToken } = require('../Middleware/auth');
 
@@ -35,7 +36,11 @@ const transactionValidation = [
     .optional()
     .trim()
     .isLength({ max: 200 })
-    .withMessage('Description cannot exceed 200 characters')
+    .withMessage('Description cannot exceed 200 characters'),
+  body('goalId')
+    .optional()
+    .isMongoId()
+    .withMessage('Goal ID must be a valid MongoDB ID') 
 ];
 
 const queryValidation = [
@@ -58,10 +63,26 @@ const queryValidation = [
   query('endDate')
     .optional()
     .isISO8601()
-    .withMessage('End date must be a valid ISO date')
+    .withMessage('End date must be a valid ISO date'),
+  query('goalId')
+    .optional()
+    .isMongoId()
+    .withMessage('Goal ID must be a valid MongoDB ID') 
 ];
 
-// Routes
+// ROUTE FOR GOAL TRANSACTIONS
+router.get('/goal/:goalId', [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100')
+], getTransactionsByGoal);
+
+// Existing Routes
 router.get('/stats', getTransactionStats);
 router.post('/bulk', bulkCreateTransactions);
 router.get('/', queryValidation, getTransactions);
