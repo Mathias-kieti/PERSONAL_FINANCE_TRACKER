@@ -99,12 +99,70 @@ transactionSchema.virtual('formattedAmount').get(function() {
   return this.type === 'expense' ? -this.amount : this.amount;
 });
 
-//  ADD INDEX FOR GOAL QUERIES
+// ADD INDEX FOR GOAL QUERIES
 transactionSchema.index({ user: 1, goalId: 1 });
 transactionSchema.index({ user: 1, date: -1 });
 transactionSchema.index({ user: 1, type: 1, category: 1 });
 transactionSchema.index({ user: 1, createdAt: -1 });
 
-// ... keep all your existing static methods ...
+// ✅ ADD THE MISSING STATIC METHODS:
+
+// Static method to get user's total income
+transactionSchema.statics.getTotalIncome = function(userId, startDate, endDate) {
+  const matchStage = { 
+    user: new mongoose.Types.ObjectId(userId), 
+    type: 'income' 
+  };
+  
+  if (startDate && endDate) {
+    matchStage.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  }
+
+  return this.aggregate([
+    { $match: matchStage },
+    { $group: { _id: null, total: { $sum: '$amount' } } }
+  ]);
+};
+
+// Static method to get user's total expenses
+transactionSchema.statics.getTotalExpenses = function(userId, startDate, endDate) {
+  const matchStage = { 
+    user: new mongoose.Types.ObjectId(userId), 
+    type: 'expense' 
+  };
+  
+  if (startDate && endDate) {
+    matchStage.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  }
+
+  return this.aggregate([
+    { $match: matchStage },
+    { $group: { _id: null, total: { $sum: '$amount' } } }
+  ]);
+};
+
+// Static method to get expenses by category
+transactionSchema.statics.getExpensesByCategory = function(userId, startDate, endDate) {
+  const matchStage = { 
+    user: new mongoose.Types.ObjectId(userId), 
+    type: 'expense' 
+  };
+  
+  if (startDate && endDate) {
+    matchStage.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  }
+
+  return this.aggregate([
+    { $match: matchStage },
+    { 
+      $group: { 
+        _id: '$category', 
+        total: { $sum: '$amount' },
+        count: { $sum: 1 }
+      } 
+    },
+    { $sort: { total: -1 } }
+  ]);
+};
 
 module.exports = mongoose.model('Transaction', transactionSchema);

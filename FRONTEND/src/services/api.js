@@ -67,7 +67,7 @@ export const transactionAPI = {
   create: (data) => api.post('/transaction', data),
   update: (id, data) => api.put(`/transaction/${id}`, data),
   delete: (id) => api.delete(`/transaction/${id}`),
-  getStats: (params) => api.get('/transaction/stat', { params }),
+  getStats: (params) => api.get('/transaction/stats', { params }),
   bulkCreate: (transaction) => api.post('/transaction/bulk', { transaction }),
 };
 

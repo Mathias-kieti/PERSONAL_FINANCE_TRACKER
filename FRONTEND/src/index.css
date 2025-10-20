@@ -2,12 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Reset default browser styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Smooth transitions for dark mode */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 body {
@@ -17,6 +21,12 @@ body {
   color: #111827; /* dark gray text */
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Dark mode styles */
+.dark body {
+  background-color: #111827; /* dark gray background */
+  color: #f9fafb; /* light gray text */
 }
 
 a {
@@ -49,8 +59,16 @@ button {
   color: #4b5563;
 }
 
+.dark .text-gray-600 {
+  color: #9ca3af;
+}
+
 .text-gray-900 {
   color: #111827;
+}
+
+.dark .text-gray-900 {
+  color: #f9fafb;
 }
 
 .bg-blue-600 {
@@ -62,10 +80,32 @@ button {
   background-color: #f9fafb;
 }
 
+.dark .bg-gray-50 {
+  background-color: #111827;
+}
+
 .rounded-full {
   border-radius: 9999px;
 }
 
 .p-4 {
   padding: 1rem;
+}
+
+/* Custom scrollbar for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
