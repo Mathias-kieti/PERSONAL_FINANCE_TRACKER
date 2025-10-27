@@ -159,7 +159,7 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Demo Credentials (dev only) */}
+        {/* Demo Credentials */}
         {process.env.NODE_ENV === "development" && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
             <p className="text-sm text-blue-800 text-center">

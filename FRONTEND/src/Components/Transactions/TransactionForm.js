@@ -55,11 +55,11 @@ const TransactionForm = ({ onSubmit }) => {
           }
         });
 
-        console.log('📡 Goals API Response status:', response.status);
+        console.log('Goals API Response status:', response.status);
 
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ Goals API Response data:', data);
+          console.log('Goals API Response data:', data);
           
           // Handle different response formats safely
           let goalsArray = [];
@@ -78,7 +78,7 @@ const TransactionForm = ({ onSubmit }) => {
             }
           }
           
-          console.log(`✅ Processed ${goalsArray.length} goals:`, goalsArray);
+          console.log(`Processed ${goalsArray.length} goals:`, goalsArray);
         
           if (!Array.isArray(goalsArray)) {
             goalsArray = [];
@@ -91,11 +91,11 @@ const TransactionForm = ({ onSubmit }) => {
           }
         } else {
           const errorText = await response.text();
-          console.error('❌ Goals API Error:', errorText);
+          console.error('Goals API Error:', errorText);
           setError(`Failed to load goals: ${response.status}`);
         }
       } catch (err) {
-        console.error('❌ Network error fetching goals:', err);
+        console.error('Network error fetching goals:', err);
         setError('Network error loading goals. Check if backend is running.');
       } finally {
         setLoadingGoals(false);

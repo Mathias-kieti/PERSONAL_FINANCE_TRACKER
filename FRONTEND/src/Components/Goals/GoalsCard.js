@@ -11,7 +11,7 @@ const GoalsCard = ({ goal, onUpdate, onDelete }) => {
     return localStorage.getItem('token');
   };
 
-  // Fetch transactions linked to this goal and calculate progress
+  // Fetch transactions linked to a goal and calculate progress
   useEffect(() => {
     const fetchGoalTransactions = async () => {
       setIsLoading(true);
@@ -98,7 +98,6 @@ const GoalsCard = ({ goal, onUpdate, onDelete }) => {
         </p>
         <p className="text-gray-600">
           Saved: <span className="font-medium">KSH {totalSaved.toLocaleString()}</span>
-          {/* ✅ REMOVED: DB comparison text */}
         </p>
         <p className="text-sm text-gray-500">
           {linkedTransactions.filter(tx => tx.type === 'income').length} income transactions linked
@@ -149,8 +148,6 @@ const GoalsCard = ({ goal, onUpdate, onDelete }) => {
           </p>
         </div>
       )}
-
-      {/* ✅ REMOVED: Debug info section completely */}
     </div>
   );
 };

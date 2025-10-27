@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 
 const GoalsForm = ({ onAddGoal }) => {
-  const [name, setName] = useState(''); // Changed from 'title'
-  const [targetAmount, setTargetAmount] = useState(''); // Changed from 'target'
+  const [name, setName] = useState(''); 
+  const [targetAmount, setTargetAmount] = useState(''); 
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim() || !targetAmount) return;
 
     const newGoal = {
-      name: name.trim(),              // ✅ Backend expects 'name'
-      targetAmount: Number(targetAmount), // ✅ Backend expects 'targetAmount'
-      currentAmount: 0,               // ✅ Backend expects 'currentAmount'
-      category: 'other',              // ✅ Add default category
-      priority: 'medium'              // ✅ Add default priority
+      name: name.trim(),              
+      targetAmount: Number(targetAmount), 
+      currentAmount: 0,               
+      category: 'other',             
+      priority: 'medium'              
     };
 
     onAddGoal(newGoal);
@@ -26,7 +26,7 @@ const GoalsForm = ({ onAddGoal }) => {
       onSubmit={handleSubmit}
       className="bg-white shadow p-4 rounded-lg flex gap-4 items-end"
     >
-      {/* Name Input (was Title) */}
+      
       <div className="flex-1">
         <label className="block text-sm font-medium text-gray-700">Goal Name</label>
         <input
@@ -39,7 +39,7 @@ const GoalsForm = ({ onAddGoal }) => {
         />
       </div>
 
-      {/* Target Amount Input (was Target) */}
+      
       <div>
         <label className="block text-sm font-medium text-gray-700">Target Amount</label>
         <input

@@ -3,7 +3,7 @@ import GoalsForm from './GoalsForm';
 import GoalsCard from './GoalsCard';
 
 const GoalsManager = () => {
-  const [goals, setGoals] = useState([]); // Fixed variable name - was 'goal'
+  const [goals, setGoals] = useState([]); 
 
   // Get token from localStorage
   const getToken = () => {
@@ -16,7 +16,7 @@ const GoalsManager = () => {
     
     fetch('http://localhost:5000/api/goal', {
       headers: {
-        'Authorization': `Bearer ${token}` // ✅ Add authorization header
+        'Authorization': `Bearer ${token}` 
       }
     })
       .then((res) => {
@@ -39,7 +39,7 @@ const GoalsManager = () => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // ✅ Add authorization header
+        'Authorization': `Bearer ${token}` 
       },
       body: JSON.stringify(goalData),
     })
@@ -51,7 +51,7 @@ const GoalsManager = () => {
       })
       .then((newGoal) => {
         console.log("Created goal:", newGoal);
-        setGoals(prevGoals => [...prevGoals, newGoal]); // ✅ Fixed state update
+        setGoals(prevGoals => [...prevGoals, newGoal]); 
       })
       .catch((err) => console.error('Error adding goal:', err));
   };
@@ -63,7 +63,7 @@ const GoalsManager = () => {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // ✅ Add authorization header
+        'Authorization': `Bearer ${token}` 
       },
       body: JSON.stringify(updatedGoal),
     })
@@ -90,7 +90,7 @@ const GoalsManager = () => {
     fetch(`http://localhost:5000/api/goal/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}` // ✅ Add authorization header
+        'Authorization': `Bearer ${token}` 
       }
     })
       .then(() => {

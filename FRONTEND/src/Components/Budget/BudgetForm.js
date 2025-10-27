@@ -6,7 +6,7 @@ const BudgetForm = ({ onSubmit }) => {
     amount: '',
   });
 
-  // Valid categories from your backend
+  // Valid categories for budget
   const validCategories = [
     'food', 'transportation', 'utilities', 'entertainment', 
     'healthcare', 'shopping', 'education', 'travel', 'housing',

@@ -91,13 +91,13 @@ const BillsManager = () => {
         return;
       }
 
-      console.log('🔍 Marking bill as paid:', bill.name, 'Amount:', bill.amount);
+      console.log('Marking bill as paid:', bill.name, 'Amount:', bill.amount);
       await billAPI.markAsPaid(billId, bill.amount);
       await fetchBillsData();
       
-      console.log('✅ Bill marked as paid successfully');
+      console.log('Bill marked as paid successfully');
     } catch (err) {
-      console.error('❌ Error marking bill as paid:', err);
+      console.error('Error marking bill as paid:', err);
       setError('Failed to mark bill as paid. Please try again.');
     }
   };

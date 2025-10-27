@@ -20,15 +20,15 @@ const TransactionList = () => {
         }
       });
 
-      console.log('🔍 DEBUG - Fetch response status:', response.status);
+      console.log('DEBUG - Fetch response status:', response.status);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('🔍 DEBUG - Full backend response:', result);
+        console.log('DEBUG - Full backend response:', result);
         
         //  Extract transactions from the nested response
         const transactionsArray = result.data.transactions || [];
-        console.log('🔍 DEBUG - Transactions array:', transactionsArray);
+        console.log('DEBUG - Transactions array:', transactionsArray);
         
         setTransactions(transactionsArray);
       } else {
@@ -47,7 +47,7 @@ const TransactionList = () => {
       const token = getToken();
       
       if (!token) {
-        console.error('❌ No token found - user not authenticated');
+        console.error('No token found - user not authenticated');
         alert('Please log in first');
         return;
       }
@@ -62,7 +62,7 @@ const TransactionList = () => {
         goalId: transactionData.goalId 
       };
 
-      console.log('🎯 [DEBUG] Sending transaction to backend with goalId:', transactionData.goalId, 'Full data:', backendData);
+      console.log('[DEBUG] Sending transaction to backend with goalId:', transactionData.goalId, 'Full data:', backendData);
 
       const response = await fetch('http://localhost:5000/api/transaction', {
         method: 'POST',
@@ -73,22 +73,22 @@ const TransactionList = () => {
         body: JSON.stringify(backendData),
       });
 
-      console.log('🔍 DEBUG - POST response status:', response.status);
+      console.log('DEBUG - POST response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log('🔍 DEBUG - Full backend response:', result);
+        console.log('DEBUG - Full backend response:', result);
         
-        // ✅ Extract transaction from the nested response
+        // Extract transaction from the nested response
         const newTransaction = result.data.transaction;
-        console.log('✅ Transaction saved successfully:', newTransaction);
-        console.log('🎯 Transaction goalId:', newTransaction.goalId); // ✅ Check if goalId is saved
+        console.log('Transaction saved successfully:', newTransaction);
+        console.log('Transaction goalId:', newTransaction.goalId); 
         
         setTransactions(prev => [...prev, newTransaction]);
         alert('Transaction saved successfully!');
       } else {
         const errorText = await response.text();
-        console.error('❌ Backend error response:', errorText);
+        console.error('Backend error response:', errorText);
         
         let errorMessage = 'Failed to save transaction';
         try {
@@ -98,11 +98,11 @@ const TransactionList = () => {
           errorMessage = errorText || errorMessage;
         }
         
-        console.error('❌ Failed to add transaction:', errorMessage);
+        console.error('Failed to add transaction:', errorMessage);
         alert('Error: ' + errorMessage);
       }
     } catch (error) {
-      console.error('❌ Network error adding transaction:', error);
+      console.error('Network error adding transaction:', error);
       alert('Network error: ' + error.message);
     }
   };
@@ -121,12 +121,12 @@ const TransactionList = () => {
 
       if (response.ok) {
         setTransactions(prev => prev.filter(tx => tx._id !== id));
-        console.log('✅ Transaction deleted successfully');
+        console.log('Transaction deleted successfully');
       } else {
-        console.error('❌ Failed to delete transaction');
+        console.error('Failed to delete transaction');
       }
     } catch (error) {
-      console.error('❌ Error deleting transaction:', error);
+      console.error('Error deleting transaction:', error);
     }
   };
 

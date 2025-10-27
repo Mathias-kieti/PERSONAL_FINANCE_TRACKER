@@ -10,13 +10,13 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   
-  // ✅ ADD DARK MODE STATE
+  // ADD DARK MODE STATE
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved === 'true';
   });
 
-  // ✅ APPLY DARK MODE TO ENTIRE APP
+  // APPLY DARK MODE TO ENTIRE APP
   useEffect(() => {
     const html = document.documentElement;
     
@@ -81,7 +81,7 @@ const Header = () => {
 
           {/* User Menu */}
           <div className="flex items-center gap-4">
-            {/* ✅ DARK MODE TOGGLE BUTTON */}
+            {/* DARK MODE TOGGLE BUTTON */}
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -176,7 +176,7 @@ const Header = () => {
             ))}
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-            {/* ✅ MOBILE DARK MODE TOGGLE */}
+            {/* MOBILE DARK MODE TOGGLE */}
             <div className="px-4 mb-3">
               <button
                 onClick={() => setDarkMode(!darkMode)}

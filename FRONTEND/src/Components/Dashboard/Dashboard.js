@@ -26,24 +26,24 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      console.log('🔄 START: Fetching dashboard data...');
+      console.log('START: Fetching dashboard data...');
       
       // Test each API call individually
-      console.log('📡 Attempting to fetch stats...');
+      console.log('Attempting to fetch stats...');
       const statsRes = await transactionAPI.getStats();
-      console.log('✅ Stats response:', statsRes);
+      console.log('Stats response:', statsRes);
       
-      console.log('📡 Attempting to fetch budgets...');
+      console.log('Attempting to fetch budgets...');
       const budgetsRes = await budgetAPI.getWithSpending();
-      console.log('✅ Budgets response:', budgetsRes);
+      console.log('Budgets response:', budgetsRes);
       
-      console.log('📡 Attempting to fetch bills...');
+      console.log('Attempting to fetch bills...');
       const billsRes = await billAPI.getUpcoming(7);
-      console.log('✅ Bills response:', billsRes);
+      console.log('Bills response:', billsRes);
 
-      console.log('🎯 Setting dashboard data...');
+      console.log('Setting dashboard data...');
       
-      // ✅ FIXED: Handle API response structure properly
+      // Handle API response structure properly
       setStats(statsRes?.data || statsRes || {
         summary: { totalIncome: 0, totalExpenses: 0, balance: 0 },
         expensesByCategory: [],
@@ -54,17 +54,17 @@ const Dashboard = () => {
       setBudgets(budgetsRes?.data?.budgets || budgetsRes?.budgets || []);
       setUpcomingBills(billsRes?.data?.bills || billsRes?.bills || []);
       
-      console.log('✅ SUCCESS: Dashboard data loaded successfully');
+      console.log('SUCCESS: Dashboard data loaded successfully');
 
     } catch (error) {
-      console.error('❌ ERROR in fetchDashboardData:', error);
-      console.error('❌ Error details:', {
+      console.error('ERROR in fetchDashboardData:', error);
+      console.error('Error details:', {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status
       });
       
-      // ✅ FIXED: Set fallback data on error
+      
       setStats({
         summary: { totalIncome: 0, totalExpenses: 0, balance: 0 },
         expensesByCategory: [],
@@ -75,7 +75,7 @@ const Dashboard = () => {
       setUpcomingBills([]);
     } finally {
       setLoading(false);
-      console.log('🏁 FINISHED: Loading state set to false');
+      console.log('FINISHED: Loading state set to false');
     }
   };
 
@@ -90,13 +90,13 @@ const Dashboard = () => {
     );
   }
 
-  // ✅ FIXED: Add safety checks for data
+  //  Add safety checks for data
   const summary = stats?.summary || { totalIncome: 0, totalExpenses: 0, balance: 0 };
   const expensesByCategory = stats?.expensesByCategory || [];
   const recentTransactions = stats?.recentTransactions || [];
   const monthlyTrends = stats?.monthlyTrends || [];
 
-  // ✅ FIXED: Safe category data formatting
+  // Safe category data formatting
   const categoryChartData = expensesByCategory.map(item => ({
     name: item._id ? item._id.charAt(0).toUpperCase() + item._id.slice(1) : 'Other',
     value: item.total || 0

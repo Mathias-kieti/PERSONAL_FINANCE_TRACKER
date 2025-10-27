@@ -1,5 +1,3 @@
-// src/utils/constants.js
-
 export const COLORS = {
   primary: '#4f46e5',    // Indigo
   secondary: '#6366f1',  // Indigo Light
@@ -19,4 +17,4 @@ export const BILL_STATUS = {
   UNPAID: 'unpaid',
 };
 
-export const DATE_FORMAT = 'YYYY-MM-DD';
+export const DATE_FORMAT = 'DD-MM-YYYY';

@@ -1,5 +1,3 @@
-// src/utils/helpers.js
-
 /**
  * Generate a random ID
  */

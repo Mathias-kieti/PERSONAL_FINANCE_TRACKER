@@ -2,7 +2,7 @@ import React from 'react';
 import { Trash2 } from 'lucide-react';
 
 const BudgetProgress = ({ budget, onDelete }) => {
-  // ✅ SAFE: Handle undefined spent value
+  // Handle undefined spent value
   const spent = budget.spent || 0;
   const percentage = (spent / budget.amount) * 100;
   

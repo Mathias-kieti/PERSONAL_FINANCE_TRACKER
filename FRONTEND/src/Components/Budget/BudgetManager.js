@@ -15,22 +15,22 @@ const BudgetManager = () => {
     try {
       const token = getToken();
       
-      // ✅ Use the endpoint that includes spending data
+      //  Use the endpoint that includes spending data
       const response = await fetch('http://localhost:5000/api/budget/with-spending', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      console.log('🔍 DEBUG - Fetch budgets response status:', response.status);
+      console.log('Fetch budgets response status:', response.status);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('🔍 DEBUG - Full backend response:', result);
+        console.log('Full backend response:', result);
         
         // Extract budgets from nested response
         const budgetsArray = result.data?.budgets || [];
-        console.log('🔍 DEBUG - Budgets with spending:', budgetsArray);
+        console.log('Budgets with spending:', budgetsArray);
         
         setBudgets(budgetsArray);
       } else {
@@ -49,27 +49,25 @@ const BudgetManager = () => {
       const token = getToken();
       
       if (!token) {
-        console.error('❌ No token found - user not authenticated');
+        console.error('No token found - user not authenticated');
         alert('Please log in first');
         return;
       }
-
-      // ✅ FIXED: Format data to match backend requirements
+      // Prepare data for backend
       const backendData = {
-        category: budgetData.category.toLowerCase(), // Backend expects lowercase
+        category: budgetData.category.toLowerCase(), 
         amount: Number(budgetData.amount),
-        period: 'monthly', // Required field - default to monthly
-        startDate: new Date().toISOString(), // Required field
-        // endDate will be auto-calculated by backend
+        period: 'monthly', 
+        startDate: new Date().toISOString(), 
         alertThresholds: {
-          warning: 80, // Default values
+          warning: 80, 
           danger: 95
         },
         isActive: true,
         autoRenew: true
       };
 
-      console.log('🔍 DEBUG - Sending budget:', backendData);
+      console.log('Sending budget:', backendData);
 
       const response = await fetch('http://localhost:5000/api/budget', {
         method: 'POST',
@@ -80,22 +78,22 @@ const BudgetManager = () => {
         body: JSON.stringify(backendData),
       });
 
-      console.log('🔍 DEBUG - POST response status:', response.status);
+      console.log('DEBUG - POST response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log('🔍 DEBUG - Full backend response:', result);
+        console.log('DEBUG - Full backend response:', result);
         
         // Extract budget from nested response
         const newBudget = result.data?.budget;
-        console.log('✅ Budget saved successfully:', newBudget);
+        console.log('Budget saved successfully:', newBudget);
         
         // Refresh the budgets list to get the new budget with spending data
         fetchBudgets();
         alert('Budget saved successfully!');
       } else {
         const errorText = await response.text();
-        console.error('❌ Backend error response:', errorText);
+        console.error('Backend error response:', errorText);
         
         let errorMessage = 'Failed to save budget';
         try {
@@ -110,11 +108,11 @@ const BudgetManager = () => {
           errorMessage = errorText || errorMessage;
         }
         
-        console.error('❌ Failed to add budget:', errorMessage);
+        console.error('Failed to add budget:', errorMessage);
         alert('Error: ' + errorMessage);
       }
     } catch (error) {
-      console.error('❌ Network error adding budget:', error);
+      console.error('Network error adding budget:', error);
       alert('Network error: ' + error.message);
     }
   };
@@ -133,12 +131,12 @@ const BudgetManager = () => {
 
       if (response.ok) {
         setBudgets(prev => prev.filter(budget => budget._id !== id));
-        console.log('✅ Budget deleted successfully');
+        console.log('Budget deleted successfully');
       } else {
-        console.error('❌ Failed to delete budget');
+        console.error('Failed to delete budget');
       }
     } catch (error) {
-      console.error('❌ Error deleting budget:', error);
+      console.error('Error deleting budget:', error);
     }
   };
 
